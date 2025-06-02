@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { useScenario } from "@/lib/ScenarioContext";
 
 function getLast12Months() {
   const months = [];
@@ -85,7 +87,31 @@ const allRows: Row[] = [
   ...summaryRows,
 ];
 
+// Map row label to backend key
+const labelToKey: Record<string, string> = {
+  "Effective Rental Income": "effective_rental_income",
+  "Vacancy": "vacancy_loss",
+  "Concessions": "concessions",
+  "Delinquency/Credit Loss/Bad Debt": "bad_debt",
+  "Management Fees": "management_fee",
+  "Total Expenses": "total_expenses",
+  "NOI": "noi",
+  "NET OPERATING INCOME (NOI)": "noi",
+  "CAPITAL EXPENDITURES": "capex",
+  "Capital Replacement / Capital Reserves": "capex",
+  "CASH FLOW FROM OPERATIONS": "cash_flow_operations",
+  "Debt Service": "debt_service",
+  "Leveraged Cash Flow": "leveraged_cash_flow",
+};
+
+const fmtCur = (val: number | undefined | null) =>
+  typeof val === "number" ? "$" + val.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "--";
+
 export default function T12ProFormaDashboard() {
+  const { scenarioInput, scenarioResults, loading, error } = useScenario();
+  const currentResult = scenarioResults[0] || null;
+  const annualCashFlows = currentResult?.annual_cash_flows || [];
+
   return (
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-4">Trailing 12 & Pro Forma Dashboard</h1>
@@ -104,7 +130,7 @@ export default function T12ProFormaDashboard() {
           <tbody>
             {allRows.map((row, idx) => (
               <tr
-                key={row.label}
+                key={row.label + '-' + idx}
                 className={
                   (row.section ? "bg-gray-100 font-bold text-sm" : "") +
                   (row.double ? " border-t-4 border-black" : "")
@@ -127,7 +153,9 @@ export default function T12ProFormaDashboard() {
                     key={month + i}
                     className="px-2 py-1 border text-right bg-yellow-50"
                   >
-                    --
+                    {i < annualCashFlows.length && labelToKey[row.label]
+                      ? fmtCur(annualCashFlows[i]?.[labelToKey[row.label]])
+                      : "--"}
                   </td>
                 ))}
               </tr>

@@ -1,18 +1,43 @@
+"use client";
 import React from "react";
+import { useScenario } from "@/lib/ScenarioContext";
 
 export default function AmortizationScheduleDashboard() {
-  // Placeholder arrays for table rows
-  const amortizationYear = '--'; // Dynamic year placeholder
+  const { scenarioInput, scenarioResults, loading, error } = useScenario();
+
+  // Use scenarioInput and scenarioResults from context for all data rendering
+  const currentResult = scenarioResults[0] || null;
+  const currentInput = scenarioInput[0] || {};
+  const annualCashFlows = currentResult?.annual_cash_flows || [];
+  const financing = currentInput?.financing || {};
+
+  // Formatting helpers
+  const fmtCur = (val: number | undefined | null) =>
+    typeof val === "number" ? "$" + val.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "--";
+  const fmtPct = (val: number | undefined | null) =>
+    typeof val === "number" ? (val * 100).toFixed(2) + "%" : "--";
+  const fmtNum = (val: number | undefined | null) =>
+    typeof val === "number" ? val.toLocaleString() : "--";
+
+  // Table helpers
   const loanYears = Array.from({ length: 7 }, (_, i) => i + 1);
-  const fyeCols = Array.from({ length: 10 }, (_, i) => `FYE ${i + 1}`);
+  const fyeCols = Array.from({ length: 7 }, (_, i) => `FYE ${i + 1}`);
   const months = [
     "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "January", "February"
   ];
   const amortRows = months.map((month, i) => ({
-    year: amortizationYear,
+    year: "--",
     month,
     idx: i + 1,
   }));
+
+  // Debt schedule values
+  const loanAmount = financing.loan_amount;
+  const interestRate = financing.interest_rate;
+  const amortizationPeriod = financing.amortization_period;
+  const loanTerm = financing.loan_term;
+  const annualPayment = annualCashFlows[0]?.debt_service;
+  const monthlyPayment = annualPayment ? annualPayment / 12 : undefined;
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -22,20 +47,20 @@ export default function AmortizationScheduleDashboard() {
         <div className="flex-1 border rounded bg-white">
           <div className="bg-slate-700 text-white font-bold px-4 py-2 rounded-t">Debt Schedule</div>
           <div className="p-4 text-sm">
-            <div>1st Mortgage <span className="float-right">$ --</span></div>
-            <div>Interest Rate <span className="float-right">-- %</span></div>
+            <div>1st Mortgage <span className="float-right">{fmtCur(loanAmount)}</span></div>
+            <div>Interest Rate <span className="float-right">{interestRate ? interestRate + "%" : "--"}</span></div>
             <div>Interest per Period <span className="float-right">-- %</span></div>
-            <div>Amortization Period <span className="float-right">--</span></div>
-            <div>Number of Payments <span className="float-right">--</span></div>
-            <div>Monthly Payment <span className="float-right">$ --</span></div>
-            <div>Total Annual Payment <span className="float-right">$ --</span></div>
+            <div>Amortization Period <span className="float-right">{amortizationPeriod ? amortizationPeriod + " yrs" : "--"}</span></div>
+            <div>Number of Payments <span className="float-right">{loanTerm ? loanTerm * 12 : "--"}</span></div>
+            <div>Monthly Payment <span className="float-right">{fmtCur(monthlyPayment)}</span></div>
+            <div>Total Annual Payment <span className="float-right">{fmtCur(annualPayment)}</span></div>
           </div>
         </div>
         {/* Loan Term Details */}
         <div className="flex-1 border rounded bg-white">
           <div className="bg-slate-700 text-white font-bold px-4 py-2 rounded-t">Loan Term Details</div>
           <div className="p-4 text-sm">
-            <div>Term: <span className="float-right">-- Years</span></div>
+            <div>Term: <span className="float-right">{loanTerm ? loanTerm + " Years" : "--"}</span></div>
             <div>Start Date: <span className="float-right">--</span></div>
             <div>Amo Starts: <span className="float-right">--</span></div>
             <div>Date of Value: <span className="float-right">--</span></div>
@@ -61,13 +86,13 @@ export default function AmortizationScheduleDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {loanYears.map((year) => (
+                {loanYears.map((year, i) => (
                   <tr key={year}>
                     <td className="px-2 py-1 border text-center">{year}</td>
                     <td className="px-2 py-1 border text-right">--</td>
                     <td className="px-2 py-1 border text-right">--</td>
                     <td className="px-2 py-1 border text-right">--</td>
-                    <td className="px-2 py-1 border text-right">--</td>
+                    <td className="px-2 py-1 border text-right">{fmtCur(annualCashFlows[i]?.debt_service)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -106,17 +131,19 @@ export default function AmortizationScheduleDashboard() {
             <thead>
               <tr className="bg-gray-100">
                 <th className="px-2 py-1 border">&nbsp;</th>
-                {fyeCols.map((col) => (
-                  <th key={col} className="px-2 py-1 border text-center">{col}</th>
+                {fyeCols.map((col, i) => (
+                  <th key={col} className="px-2 py-1 border text-center">Year {i + 1}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {['Principal', 'Interest', 'Total', 'Balance'].map((row) => (
+              {['Principal', 'Interest', 'Total', 'Balance'].map((row, rowIdx) => (
                 <tr key={row}>
                   <td className="px-2 py-1 border font-bold bg-gray-50">{row}</td>
-                  {fyeCols.map((col, idx) => (
-                    <td key={col + idx} className="px-2 py-1 border text-right">--</td>
+                  {fyeCols.map((col, i) => (
+                    <td key={col + i} className="px-2 py-1 border text-right">
+                      {row === 'Total' ? fmtCur(annualCashFlows[i]?.debt_service) : '--'}
+                    </td>
                   ))}
                 </tr>
               ))}
