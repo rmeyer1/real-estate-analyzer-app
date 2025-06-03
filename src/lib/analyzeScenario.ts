@@ -33,11 +33,17 @@ export interface ScenarioAnalysisRequest {
   unit_types: UnitTypeRequest[];
 }
 
-// You can expand this type based on your backend's response structure
+// Add this type for annual cash flows
+export interface AnnualCashFlow {
+  debt_service?: number;
+  [key: string]: any;
+}
+
+// Update the response interface
 export interface AnalyzeScenarioResponse {
   status: string;
   irr_results: any;
-  annual_cash_flows: any;
+  annual_cash_flows: AnnualCashFlow[];
   exit_analysis: any;
   equity_required: number;
 }
