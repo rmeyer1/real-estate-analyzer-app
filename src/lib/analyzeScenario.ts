@@ -52,8 +52,10 @@ export async function analyzeScenario(
   scenario: ScenarioAnalysisRequest
 ): Promise<AnalyzeScenarioResponse> {
   try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
     const response = await axios.post<AnalyzeScenarioResponse>(
-      'http://localhost:8000/analyze',
+      `${apiUrl}/analyze`,
       scenario,
       {
         headers: {
