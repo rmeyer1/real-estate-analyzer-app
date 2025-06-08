@@ -52,7 +52,7 @@ export async function analyzeScenario(
   scenario: ScenarioAnalysisRequest
 ): Promise<AnalyzeScenarioResponse> {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     const response = await axios.post<AnalyzeScenarioResponse>(
       `${apiUrl}/analyze`,

@@ -24,7 +24,8 @@ export default function SidebarLayout({ children }: { children: ReactNode }) {
         <aside className="w-64 bg-gray-900 text-white flex flex-col p-4 space-y-2 min-h-full">
           <div className="text-2xl font-bold mb-8 tracking-tight">Real Estate Analyzer</div>
           <nav className="flex flex-col gap-2">
-            <Link href="/dashboard/description" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Description</Link>
+            <Link href="/dashboard/scenario-setup" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Scenario Setup</Link>
+            <Link href="/dashboard/description" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Returns Summary</Link>
             <Link href="/dashboard/projection" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Projection</Link>
             <Link href="/dashboard/t12-pro-forma" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Trailing 12 & Pro Forma</Link>
             <Link href="/dashboard/rent-roll-summary" className="hover:bg-gray-800 rounded px-3 py-2 transition-colors">Rent Roll Summary</Link>
