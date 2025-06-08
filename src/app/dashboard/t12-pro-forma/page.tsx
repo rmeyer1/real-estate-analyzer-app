@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useScenario } from "@/lib/ScenarioContext";
 
 function getLast12Months() {
@@ -90,10 +90,40 @@ const allRows: Row[] = [
 // Map row label to backend key
 const labelToKey: Record<string, string> = {
   "Effective Rental Income": "effective_rental_income",
+  "Rental Income": "rental_income",
+  "Gain/Loss to Lease": "gain_loss_to_lease",
+  "Gross Potential Income": "gross_potential_income",
   "Vacancy": "vacancy_loss",
   "Concessions": "concessions",
   "Delinquency/Credit Loss/Bad Debt": "bad_debt",
+  "Total Rental Income": "total_rental_income",
+  "Other Income": "other_income",
+  "Laundry": "Laundry",
+  "Parking": "Parking",
+  "Late Fee Revenue": "Late Fee Revenue",
+  "Other Resident Revenue": "Other Resident Revenue",
+  "Total Other Income": "total_other_income",
+  "TOTAL INCOME": "total_income",
+  "Administrative": "Administrative",
+  "Advertising": "Advertising",
+  "Supplies": "Supplies",
+  "Repairs and Maintenance": "Repairs and Maintenance",
+  "Electricity": "Electricity",
+  "Water": "Water",
+  "Trash Removal": "Trash Removal",
+  "Pest Control": "Pest Control",
+  "Contract Services": "Contract Services",
+  "Telephone": "Telephone",
+  "Staff Development": "Staff Development",
+  "Professional Fees": "Professional Fees",
+  "Miscellaneous": "Miscellaneous",
+  "Security": "Security",
+  "Equipment Lease": "Equipment Lease",
+  "Total Variable Expenses": "total_variable_expenses",
   "Management Fees": "management_fee",
+  "Real Estate Taxes": "real_estate_taxes",
+  "Property Liability/Insurance": "insurance",
+  "Total Fixed Expenses": "total_fixed_expenses",
   "Total Expenses": "total_expenses",
   "NOI": "noi",
   "NET OPERATING INCOME (NOI)": "noi",
@@ -106,6 +136,41 @@ const labelToKey: Record<string, string> = {
 
 const fmtCur = (val: number | undefined | null) =>
   typeof val === "number" ? "$" + val.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "--";
+
+function AssumedValue({ value, assumed }: { value: number | undefined | null, assumed: boolean }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position: 'relative' }}>
+      {fmtCur(value)}
+      {assumed && (
+        <span
+          style={{ color: 'orange', cursor: 'pointer', marginLeft: 2 }}
+          onMouseEnter={() => setShow(true)}
+          onMouseLeave={() => setShow(false)}
+        >
+          *
+          {show && (
+            <span style={{
+              position: 'absolute',
+              background: '#fffbe6',
+              color: '#333',
+              border: '1px solid #e2e8f0',
+              padding: '2px 6px',
+              borderRadius: 4,
+              left: 12,
+              top: -4,
+              zIndex: 10,
+              fontSize: '0.85em',
+              whiteSpace: 'nowrap',
+            }}>
+              Value is an estimate based on default assumptions.
+            </span>
+          )}
+        </span>
+      )}
+    </span>
+  );
+}
 
 export default function T12ProFormaDashboard() {
   const { scenarioInput, scenarioResults, loading, error } = useScenario();
@@ -148,16 +213,20 @@ export default function T12ProFormaDashboard() {
                 >
                   {row.label}
                 </td>
-                {months.map((month, i) => (
-                  <td
-                    key={month + i}
-                    className="px-2 py-1 border text-right bg-yellow-50"
-                  >
-                    {i < annualCashFlows.length && labelToKey[row.label]
-                      ? fmtCur(annualCashFlows[i]?.[labelToKey[row.label]])
-                      : "--"}
-                  </td>
-                ))}
+                {months.map((month, i) => {
+                  const key = labelToKey[row.label];
+                  const assumedKey = key ? `${key}_assumed` : undefined;
+                  const value = i < annualCashFlows.length && key ? annualCashFlows[i]?.[key] : undefined;
+                  const assumed = i < annualCashFlows.length && assumedKey ? !!annualCashFlows[i]?.[assumedKey] : false;
+                  return (
+                    <td
+                      key={month + i}
+                      className="px-2 py-1 border text-right bg-yellow-50"
+                    >
+                      {key ? <AssumedValue value={value} assumed={assumed} /> : "--"}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
