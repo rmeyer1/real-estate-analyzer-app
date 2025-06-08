@@ -33,14 +33,14 @@ export default function ScenarioSetupDashboard() {
     { unit_type: "", description: "", unit_count: "", sqft_per_unit: "", market_rent: "" },
   ]);
   // State for income breakdown
-  const [incomeBreakdown, setIncomeBreakdown] = useState({
+  const [incomeBreakdown, setIncomeBreakdown] = useState<Record<string, string>>({
     Laundry: "",
     Parking: "",
     "Late Fee Revenue": "",
     "Other Resident Revenue": "",
   });
   // State for expense breakdown
-  const [expenseBreakdown, setExpenseBreakdown] = useState({
+  const [expenseBreakdown, setExpenseBreakdown] = useState<Record<string, string>>({
     Administrative: "",
     Advertising: "",
     Supplies: "",
