@@ -32,6 +32,31 @@ export default function ScenarioSetupDashboard() {
   const [unitTypes, setUnitTypes] = useState([
     { unit_type: "", description: "", unit_count: "", sqft_per_unit: "", market_rent: "" },
   ]);
+  // State for income breakdown
+  const [incomeBreakdown, setIncomeBreakdown] = useState<Record<string, string>>({
+    Laundry: "",
+    Parking: "",
+    "Late Fee Revenue": "",
+    "Other Resident Revenue": "",
+  });
+  // State for expense breakdown
+  const [expenseBreakdown, setExpenseBreakdown] = useState<Record<string, string>>({
+    Administrative: "",
+    Advertising: "",
+    Supplies: "",
+    "Repairs and Maintenance": "",
+    Electricity: "",
+    Water: "",
+    "Trash Removal": "",
+    "Pest Control": "",
+    "Contract Services": "",
+    Telephone: "",
+    "Staff Development": "",
+    "Professional Fees": "",
+    Miscellaneous: "",
+    Security: "",
+    "Equipment Lease": "",
+  });
   // API state
   const { setScenarioInput, setScenarioResults, loading, setLoading, error, setError } = useScenario();
 
@@ -102,6 +127,16 @@ export default function ScenarioSetupDashboard() {
             sqft_per_unit: Number(ut.sqft_per_unit) || 0,
             market_rent: Number(ut.market_rent) || 0,
           })),
+          income_breakdown: Object.fromEntries(
+            Object.entries(incomeBreakdown)
+              .filter(([_, v]) => v !== "" && !isNaN(Number(v)))
+              .map(([k, v]) => [k, Number(v)])
+          ),
+          expense_breakdown: Object.fromEntries(
+            Object.entries(expenseBreakdown)
+              .filter(([_, v]) => v !== "" && !isNaN(Number(v)))
+              .map(([k, v]) => [k, Number(v)])
+          ),
         };
         return analyzeScenario(payload).catch(() => null);
       });
@@ -250,6 +285,44 @@ export default function ScenarioSetupDashboard() {
           </button>
         </div>
         {!isValidRentRoll && <div className="text-red-600 mt-2">Please enter at least one unit type with a nonzero count and market rent.</div>}
+      </div>
+
+      {/* Other Income Breakdown */}
+      <div className="mb-10">
+        <h2 className="text-xl font-semibold mb-2">Other Income Breakdown (Optional)</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {Object.keys(incomeBreakdown).map((key) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
+              <input
+                type="number"
+                className="w-full border rounded px-2 py-1"
+                value={incomeBreakdown[key]}
+                onChange={e => setIncomeBreakdown(prev => ({ ...prev, [key]: e.target.value }))}
+                placeholder={`Enter amount for ${key}`}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Operating Expense Breakdown */}
+      <div className="mb-10">
+        <h2 className="text-xl font-semibold mb-2">Operating Expense Breakdown (Optional)</h2>
+        <div className="grid grid-cols-2 gap-4">
+          {Object.keys(expenseBreakdown).map((key) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{key}</label>
+              <input
+                type="number"
+                className="w-full border rounded px-2 py-1"
+                value={expenseBreakdown[key]}
+                onChange={e => setExpenseBreakdown(prev => ({ ...prev, [key]: e.target.value }))}
+                placeholder={`Enter amount for ${key}`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Run Analysis Button */}

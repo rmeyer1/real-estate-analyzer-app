@@ -31,6 +31,8 @@ export interface ScenarioAnalysisRequest {
   property: PropertyRequest;
   financing: FinancingRequest;
   unit_types: UnitTypeRequest[];
+  income_breakdown?: Record<string, number>;
+  expense_breakdown?: Record<string, number>;
 }
 
 // Add this type for annual cash flows

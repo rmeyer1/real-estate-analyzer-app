@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import numpy_financial as npf
 from typing import Dict, Any
+from .assumptions import DEFAULT_INCOME_BREAKDOWN, DEFAULT_EXPENSE_RATIOS
 
 # --- Real Implementations ---
 
@@ -135,11 +136,35 @@ class DebtServiceCalculator:
 
 class CashFlowCalculator:
     """Main cash flow and returns calculation engine"""
-    def __init__(self, model):
+    def __init__(self, model, income_breakdown=None, expense_breakdown=None):
         self.model = model
         self.income_projector = IncomeProjector(model)
         self.expense_projector = ExpenseProjector(model)
         self.debt_calculator = DebtServiceCalculator(model.financing)
+        self.income_breakdown = income_breakdown or {}
+        self.expense_breakdown = expense_breakdown or {}
+
+    def get_income_breakdown(self, total_other_income):
+        breakdown = {}
+        assumed_flags = {}
+        for k, pct in DEFAULT_INCOME_BREAKDOWN.items():
+            if k in self.income_breakdown:
+                breakdown[k] = self.income_breakdown[k]
+            else:
+                breakdown[k] = pct * total_other_income
+                assumed_flags[k] = True
+        return breakdown, assumed_flags
+
+    def get_expense_breakdown(self, gross_income):
+        breakdown = {}
+        assumed_flags = {}
+        for k, pct in DEFAULT_EXPENSE_RATIOS.items():
+            if k in self.expense_breakdown:
+                breakdown[k] = self.expense_breakdown[k]
+            else:
+                breakdown[k] = pct * gross_income
+                assumed_flags[k] = True
+        return breakdown, assumed_flags
 
     def calculate_annual_cash_flow(self, year: int) -> Dict[str, Any]:
         """Calculate complete annual cash flow for given year"""
@@ -148,8 +173,12 @@ class CashFlowCalculator:
         other_income = self.income_projector.calculate_other_income(year)
         gross_income = income_data.get('effective_rental_income', 0.0) + other_income
 
+        # Detailed income breakdown
+        income_breakdown, income_assumed = self.get_income_breakdown(other_income)
+
         # Expense calculations
         expense_data = self.expense_projector.calculate_total_expenses(year, gross_income)
+        expense_breakdown, expense_assumed = self.get_expense_breakdown(gross_income)
 
         # NOI calculation
         noi = gross_income - expense_data.get('total_expenses', 0.0)
@@ -166,7 +195,8 @@ class CashFlowCalculator:
         # Leveraged cash flow
         leveraged_cash_flow = cash_flow_operations - debt_service
 
-        return {
+        # Build output with assumed flags only for assumed fields
+        output = {
             'gross_income': gross_income,
             'total_expenses': expense_data.get('total_expenses', 0.0),
             'noi': noi,
@@ -177,6 +207,17 @@ class CashFlowCalculator:
             **income_data,
             **expense_data
         }
+        # Add detailed income breakdown
+        for k, v in income_breakdown.items():
+            if k in income_assumed:
+                output[f'{k}_assumed'] = True
+            output[k] = v
+        # Add detailed expense breakdown
+        for k, v in expense_breakdown.items():
+            if k in expense_assumed:
+                output[f'{k}_assumed'] = True
+            output[k] = v
+        return output
 
     def calculate_exit_value(self, exit_year: int) -> Dict[str, float]:
         """Calculate property exit value and proceeds"""

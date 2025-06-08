@@ -52,6 +52,8 @@ class ScenarioAnalysisRequest(BaseModel):
     property: PropertyRequest
     financing: FinancingRequest
     unit_types: List[UnitTypeRequest]
+    income_breakdown: Dict[str, float] = {}
+    expense_breakdown: Dict[str, float] = {}
 
 @app.get("/")
 def read_root():
@@ -75,7 +77,11 @@ def analyze_scenario(request: ScenarioAnalysisRequest):
     financing_params = FinancingParameters(**request.financing.dict())
     unit_types = [UnitType(**ut.dict()) for ut in request.unit_types]
     model = RealEstateModel(property_params, financing_params, unit_types)
-    calculator = CashFlowCalculator(model)
+    calculator = CashFlowCalculator(
+        model,
+        income_breakdown=request.income_breakdown or {},
+        expense_breakdown=request.expense_breakdown or {}
+    )
     irr_results = calculator.calculate_irr()
     annual_cash_flows = [calculator.calculate_annual_cash_flow(year) for year in range(property_params.hold_period)]
     exit_analysis = calculator.calculate_exit_value(property_params.hold_period)
