@@ -1,5 +1,5 @@
 {
-  "install": "npm install && cd backend && pip3 install -r requirements.txt",
+  "install": "npm install && cd backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt",
   "terminals": [
     {
       "name": "Next.js Frontend",
@@ -7,7 +7,7 @@
     },
     {
       "name": "FastAPI Backend",
-      "command": "cd real-estate-analyzer-app/backend && uvicorn main:app --reload"
+      "command": "cd real-estate-analyzer-app/backend && source venv/bin/activate && uvicorn main:app --reload"
     }
   ]
 }
