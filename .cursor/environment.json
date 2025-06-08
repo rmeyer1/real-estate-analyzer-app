@@ -1,5 +1,5 @@
 {
-  "install": "cd real-estate-analyzer-app && npm install && cd backend && pip install -r requirements.txt && cd ../functions && npm install",
+  "install": "npm install && cd backend && pip3 install -r requirements.txt",
   "terminals": [
     {
       "name": "Next.js Frontend",
