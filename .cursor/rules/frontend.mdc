@@ -1,0 +1,6 @@
+---
+description: 
+globs: *.tsx
+alwaysApply: false
+---
+Whenever creating new or updating current CSS in the app review the [tailwind-design-guide.md](mdc:docs/frontend/tailwind-design-guide.md) and use the [tailwind-component-examples.md](mdc:docs/frontend/tailwind-component-examples.md) For pre-built components or example references. 

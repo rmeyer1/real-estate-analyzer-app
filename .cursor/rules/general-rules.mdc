@@ -1,0 +1,8 @@
+---
+description: Creating new features or updating existing features
+globs: 
+alwaysApply: false
+---
+Whenever you are creating new features or updating existing features, read the [Product Requirements Document (PRD)_ Real Estate I.md](mdc:docs/Product Requirements Document (PRD) for context.  Never begin a task unless you are >= 95% confidence you understand the task.  If you are below this confidence, continue to ask questions until you meet the 95% or greater threshold.  
+
+Use Python to extract the contents of the [Building_I_Want v5.xlsx](mdc:docs/Building_I_Want v5.xlsx) to review formulas when re-creating them in code.  

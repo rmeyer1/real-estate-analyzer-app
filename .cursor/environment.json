@@ -1,0 +1,13 @@
+{
+  "install": "cd real-estate-analyzer-app && npm install && cd backend && pip install -r requirements.txt && cd ../functions && npm install",
+  "terminals": [
+    {
+      "name": "Next.js Frontend",
+      "command": "cd real-estate-analyzer-app && npm run dev"
+    },
+    {
+      "name": "FastAPI Backend",
+      "command": "cd real-estate-analyzer-app/backend && uvicorn main:app --reload"
+    }
+  ]
+}
